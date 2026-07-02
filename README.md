@@ -1,4 +1,4 @@
-# Rental Tracker
+# Rentals Buddy
 
 An interactive tracker for comparing rental listings (house shares, studios, flats) by
 price, features, and real-world distance to the places that matter to you — built
