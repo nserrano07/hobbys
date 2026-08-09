@@ -211,7 +211,7 @@ Best regards,
           <div className="flex items-center space-x-3">
             <span className="text-3xl">🏠</span>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Rental Tracker</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Rentals Buddy</h1>
               <p className="text-blue-100 text-xs font-medium">Compare listings by distance to the places that matter to you</p>
             </div>
           </div>
@@ -388,7 +388,7 @@ Best regards,
       <RemovalModal property={removalTarget} onCancel={() => setRemovalTarget(null)} onConfirm={confirmRemoval} />
 
       <footer className="bg-slate-900 text-slate-400 text-center py-8 mt-12 border-t border-slate-800 text-xs">
-        <p>Rental Tracker — a portfolio project by Natalia Serrano Ortiz.</p>
+        <p>Rentals Buddy — a portfolio project by Natalia Serrano Ortiz.</p>
         <p className="mt-1 text-slate-600">All data stays in your browser via localStorage — nothing is sent to a server.</p>
       </footer>
     </div>
