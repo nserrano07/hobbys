@@ -31,9 +31,9 @@ export function parseListingText(rawText) {
   }
 
   // Postcode (full or district, e.g. BR5 3QY or BR5)
-  const postcodeMatch = text.match(/\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})?\b/);
+  const postcodeMatch = text.match(/\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})?\b/i);
   if (postcodeMatch) {
-    found.postcode = postcodeMatch[2] ? `${postcodeMatch[1]} ${postcodeMatch[2]}` : postcodeMatch[1];
+    found.postcode = (postcodeMatch[2] ? `${postcodeMatch[1]} ${postcodeMatch[2]}` : postcodeMatch[1]).toUpperCase();
   } else {
     missing.push("postcode");
   }
