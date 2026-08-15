@@ -24,14 +24,13 @@ apps/
 
 ## Why two different hosts?
 
-Both apps deploy from this one repo, but to different places:
+Both apps deploy from this one repo, but to different places, since GitHub Pages only
+supports a single custom domain per repository and Rentals Buddy already has it:
 
-- **Rentals Buddy** → **GitHub Pages** (`.github/workflows/deploy-rentals.yml`), using
-  this repo's one allowed custom domain.
-- **Family Bingo** → **Cloudflare Pages** (`.github/workflows/deploy-bingo.yml`), since
-  GitHub Pages only supports a single custom domain per repository and Rentals Buddy
-  already has it.
-
-Each workflow only runs when its app's folder changes, so the two deploy independently.
+- **Rentals Buddy** → **GitHub Pages**, via a path-scoped GitHub Actions workflow
+  (`.github/workflows/deploy-rentals.yml`) that only runs when `apps/rentals/` changes.
+- **Family Bingo** → **Cloudflare Pages**, via Cloudflare's own Git integration (no
+  GitHub Actions workflow) — it builds directly from `apps/bingo/` on every push to
+  `main`.
 
 See each app's own README for its features and one-time deployment setup.

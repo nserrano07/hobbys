@@ -49,26 +49,28 @@ join with the room code in the other.
 
 This app deploys to **Cloudflare Pages**, not GitHub Pages — GitHub Pages only supports
 one custom domain per repository, and `apps/rentals` already uses this repo's for
-`rentals.nataliaserranoortiz.com`. Pushing to `main` (with changes under `apps/bingo/`)
-runs `.github/workflows/deploy-bingo.yml`.
+`rentals.nataliaserranoortiz.com`.
 
-One-time setup:
+It uses Cloudflare's **native Git integration** (Pages project connected directly to
+this GitHub repo) rather than a GitHub Actions workflow — Cloudflare builds and deploys
+on its own whenever `main` changes, with no API tokens or repo secrets to manage.
 
-1. Create a free [Cloudflare](https://dash.cloudflare.com/sign-up) account if you don't
-   have one, and a **Pages** project named `family-bingo` (Workers & Pages → Create →
-   Pages → connect to Git, or just let the first deploy from the Action create it).
-2. Create a Cloudflare API token with the **Cloudflare Pages: Edit** permission
-   (My Profile → API Tokens → Create Token), and grab your **Account ID** (right sidebar
-   of any Cloudflare dashboard page).
-3. In this GitHub repo's **Settings → Secrets and variables → Actions**, add:
-   - `CLOUDFLARE_API_TOKEN`
-   - `CLOUDFLARE_ACCOUNT_ID`
-4. In the Cloudflare Pages project's **Custom domains** tab, add
-   `bingo.nataliaserranoortiz.com` and follow its DNS instructions (a `CNAME` record
-   pointing at the `*.pages.dev` address Cloudflare gives you).
+One-time setup, in the Cloudflare dashboard (Workers & Pages → your project →
+**Settings → Builds & deployments**):
 
-Once those secrets exist, every push to `main` touching `apps/bingo/` redeploys
-automatically.
+- **Root directory**: `apps/bingo`
+- **Build command**: `npm run build`
+- **Build output directory**: not set in the dashboard — Cloudflare reads it from
+  `apps/bingo/wrangler.toml` (`pages_build_output_dir = "dist"`) instead, since a
+  wrangler config file is present.
+
+Then, in the project's **Custom domains** tab, add `bingo.nataliaserranoortiz.com` and
+follow its DNS instructions (a `CNAME` record pointing at the `*.pages.dev` address
+Cloudflare gives you).
+
+Once the build settings above are saved, every push to `main` triggers a fresh deploy
+automatically (Cloudflare rebuilds on any change to the repo, not just `apps/bingo/` —
+harmless, just an extra build once in a while when only `apps/rentals` changes).
 
 This app lives at `apps/bingo/` inside the `hobbys` monorepo — see the
 [top-level README](../../README.md) for the other projects alongside it.

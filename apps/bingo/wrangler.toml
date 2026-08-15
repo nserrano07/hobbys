@@ -1,0 +1,5 @@
+# Cloudflare's dashboard build settings no longer include a "build output
+# directory" field when a wrangler config file is present — it reads it
+# from here instead.
+pages_build_output_dir = "dist"
+compatibility_date = "2026-08-15"
