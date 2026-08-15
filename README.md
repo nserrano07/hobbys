@@ -1,55 +1,36 @@
-# Rentals Buddy
+# hobbys
 
-An interactive tracker for comparing rental listings (house shares, studios, flats) by
-price, features, and real-world distance to the places that matter to you — built
-while house-hunting around Orpington & Bromley, Kent.
+Small, self-contained apps I've built for my own use — each one solves a real problem I
+had, each one lives entirely in the browser (no backend, no accounts), and each one is
+listed as a project on [my portfolio](https://github.com/nserrano07/portfolio).
 
-Live at **https://rentals.nataliaserranoortiz.com** (once DNS is configured — see below).
+| App | What it does | Live | Source |
+|---|---|---|---|
+| 🏠 Rentals Buddy | Compares rental listings by price, features, and distance to the places that matter | [rentals.nataliaserranoortiz.com](https://rentals.nataliaserranoortiz.com) | [`apps/rentals`](apps/rentals) |
+| 🎱 Family Bingo | Classic 75-ball bingo, played live over a video call with family | [bingo.nataliaserranoortiz.com](https://bingo.nataliaserranoortiz.com) | [`apps/bingo`](apps/bingo) |
 
-## Features
+## Layout
 
-- **Places you care about** — add any number of anchor locations (work, gym, family)
-  by clicking on the map; every listing is scored by distance to each one.
-- **Smart Paste** — paste the raw text you copy from an OpenRent/Rightmove listing and
-  the app extracts price, bedrooms, bathrooms, bills-included, deposit, availability
-  and furnishing status automatically. Runs entirely in your browser against the text
-  you provide — nothing is fetched from the network, so it never invents data.
-- **Manual entry** as a fallback/complement to Smart Paste.
-- **Interactive map** (Leaflet + OpenStreetMap) showing anchors and listings, color-coded
-  by status.
-- **Filter & sort** by budget, application status, and proximity score.
-- **Status tracking** per listing (Not Contacted → Contacted → Viewing Scheduled → Offer
-  Made → Rejected), star ratings, viewing dates, and private notes.
-- **One-click outreach draft** — copies a ready-to-send inquiry message to your clipboard.
-- **Archive or delete with a reason** — every removal records why (already let, too
-  expensive, no response, etc.); archived listings are restorable, and a removal log
-  keeps a record even after permanent deletion.
-- **Clear Session** — wipe all data in one click so anyone else can use this tool for
-  their own search from a blank slate. Everything persists only in your browser's
-  `localStorage` — no backend, no accounts, no data ever leaves your device.
+This is a small monorepo — each app under `apps/` is a fully independent Vite project
+with its own `package.json`, dependencies, and deploy pipeline. There's no shared
+workspace tooling; `cd` into an app's folder and run its own `npm install` / `npm run dev`
+as normal.
 
-## Why no auto-import from listing URLs?
-
-A lot of "paste a URL and we'll fetch it" tools quietly fabricate data when they can't
-actually reach the page. This one doesn't: it only ever shows facts you provided,
-either by pasting the listing's own text (Smart Paste) or typing them in yourself.
-
-## Development
-
-```bash
-npm install
-npm run dev      # local dev server
-npm run build     # production build to dist/
-npm run preview   # preview the production build
+```
+apps/
+  rentals/   # Rentals Buddy — see apps/rentals/README.md
+  bingo/     # Family Bingo — see apps/bingo/README.md
 ```
 
-## Deployment
+## Why two different hosts?
 
-Pushing to `main` builds the app and deploys it to GitHub Pages via
-`.github/workflows/deploy.yml`. One-time setup:
+Both apps deploy from this one repo, but to different places, since GitHub Pages only
+supports a single custom domain per repository and Rentals Buddy already has it:
 
-1. In the repo's **Settings → Pages**, set the source to **GitHub Actions**.
-2. In your domain's DNS, add a `CNAME` record: `rentals` → `<your-github-username>.github.io`.
-3. The `public/CNAME` file (deployed as `dist/CNAME`) already points at
-   `rentals.nataliaserranoortiz.com` — GitHub Pages picks it up automatically once the
-   DNS record resolves and you can enforce HTTPS in the Pages settings.
+- **Rentals Buddy** → **GitHub Pages**, via a path-scoped GitHub Actions workflow
+  (`.github/workflows/deploy-rentals.yml`) that only runs when `apps/rentals/` changes.
+- **Family Bingo** → **Cloudflare Pages**, via Cloudflare's own Git integration (no
+  GitHub Actions workflow) — it builds directly from `apps/bingo/` on every push to
+  `main`.
+
+See each app's own README for its features and one-time deployment setup.
