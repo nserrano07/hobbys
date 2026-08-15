@@ -1,5 +1,14 @@
-# Cloudflare's dashboard build settings no longer include a "build output
-# directory" field when a wrangler config file is present — it reads it
-# from here instead.
-pages_build_output_dir = "dist"
+# This project deploys as a Cloudflare Worker with static assets (the
+# unified Workers + Pages product), not the legacy Pages product — the
+# dashboard's own "Deploy command" for this project is `wrangler deploy`,
+# which reads config from here rather than from dashboard fields.
+#
+# `name` must match the Worker's actual name in the Cloudflare dashboard
+# (Workers & Pages > hobbys) so this deploys to the existing project
+# instead of trying to create a new one.
+name = "hobbys"
 compatibility_date = "2026-08-15"
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"

@@ -47,30 +47,33 @@ join with the room code in the other.
 
 ## Deployment
 
-This app deploys to **Cloudflare Pages**, not GitHub Pages — GitHub Pages only supports
-one custom domain per repository, and `apps/rentals` already uses this repo's for
+This app deploys to **Cloudflare**, not GitHub Pages — GitHub Pages only supports one
+custom domain per repository, and `apps/rentals` already uses this repo's for
 `rentals.nataliaserranoortiz.com`.
 
-It uses Cloudflare's **native Git integration** (Pages project connected directly to
-this GitHub repo) rather than a GitHub Actions workflow — Cloudflare builds and deploys
-on its own whenever `main` changes, with no API tokens or repo secrets to manage.
+It uses Cloudflare's **native Git integration**, connected directly to this GitHub repo
+as a **Worker with static assets** (Cloudflare's current unified Workers + Pages
+product) rather than a GitHub Actions workflow — Cloudflare builds and deploys on its
+own whenever this repo changes, with no API tokens or repo secrets to manage. Its
+build/deploy commands (`npm run build` / `npx wrangler deploy`) read config from
+`apps/bingo/wrangler.toml`, including the build output directory (`[assets] directory`)
+— there's no separate "build output directory" field in the dashboard for this project
+type.
 
 One-time setup, in the Cloudflare dashboard (Workers & Pages → your project →
-**Settings → Builds & deployments**):
+**Settings → Build**):
 
 - **Root directory**: `apps/bingo`
-- **Build command**: `npm run build`
-- **Build output directory**: not set in the dashboard — Cloudflare reads it from
-  `apps/bingo/wrangler.toml` (`pages_build_output_dir = "dist"`) instead, since a
-  wrangler config file is present.
+- **Build command**: `npm run build` (Cloudflare fills this in automatically)
+- **Deploy command**: `npx wrangler deploy` (also automatic — reads
+  `apps/bingo/wrangler.toml` for everything else)
 
-Then, in the project's **Custom domains** tab, add `bingo.nataliaserranoortiz.com` and
-follow its DNS instructions (a `CNAME` record pointing at the `*.pages.dev` address
-Cloudflare gives you).
+Then, in the project's **Domains** tab, add `bingo.nataliaserranoortiz.com` and follow
+its DNS instructions.
 
-Once the build settings above are saved, every push to `main` triggers a fresh deploy
-automatically (Cloudflare rebuilds on any change to the repo, not just `apps/bingo/` —
-harmless, just an extra build once in a while when only `apps/rentals` changes).
+Every push triggers a fresh deploy automatically (Cloudflare rebuilds on any change to
+the repo, not just `apps/bingo/` — harmless, just an extra build once in a while when
+only `apps/rentals` changes).
 
 This app lives at `apps/bingo/` inside the `hobbys` monorepo — see the
 [top-level README](../../README.md) for the other projects alongside it.
