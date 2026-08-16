@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { WIN_MODES, winModeLabel } from "../lib/bingoCard";
+import WinPatternExample from "./WinPatternExample";
 
 export default function GameHeader({
   roomCode,
@@ -35,8 +36,9 @@ export default function GameHeader({
             <p className="text-indigo-200 text-xs font-medium flex items-center gap-1.5 flex-wrap">
               Room <span className="font-mono font-bold tracking-widest">{roomCode}</span>
               {!synced && <span className="text-amber-300">· connecting…</span>}
-              <span className="text-indigo-300">
+              <span className="text-indigo-300 flex items-center gap-1.5">
                 · Playing for: <span className="text-white font-semibold">{winModeLabel(roundMode)}</span>
+                <WinPatternExample modeId={roundMode} />
               </span>
             </p>
           </div>
@@ -59,18 +61,21 @@ export default function GameHeader({
           </button>
           {isHost && (
             <>
-              <select
-                value={nextMode}
-                onChange={(e) => setNextMode(e.target.value)}
-                className="bg-indigo-800 border border-indigo-500 text-white text-xs font-semibold rounded-lg py-2 px-2 focus:outline-none focus:ring-2 focus:ring-white/50"
-                title="Win pattern for the next round"
-              >
-                {WIN_MODES.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center gap-1.5 bg-indigo-800 border border-indigo-500 rounded-lg py-1 px-2">
+                <WinPatternExample modeId={nextMode} />
+                <select
+                  value={nextMode}
+                  onChange={(e) => setNextMode(e.target.value)}
+                  className="bg-transparent text-white text-xs font-semibold focus:outline-none"
+                  title="Win pattern for the next round"
+                >
+                  {WIN_MODES.map((m) => (
+                    <option key={m.id} value={m.id} className="text-slate-900">
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <button
                 onClick={() => onStartNewRound(nextMode)}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-3 rounded-lg text-xs transition-colors"

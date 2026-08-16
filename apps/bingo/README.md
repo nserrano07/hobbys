@@ -14,9 +14,9 @@ Live at **https://bingo.nataliaserranoortiz.com** (once deployed — see below).
   players never see them; the caller does, so they can keep tabs on everyone's
   progress (see Player Progress below).
 - The caller picks a **round mode** — Any Line, Any Letter (a full column), or Full
-  House (blackout) — shown to everyone so it's clear what pattern wins. Real bingo
-  halls call this out too; shorter rounds are usually Line or Letter, a proper game is
-  Blackout.
+  House (blackout) — shown to everyone (with a small diagram of the shape) so it's
+  clear what pattern wins. Real bingo halls call this out too; shorter rounds are
+  usually Line or Letter, a proper game is Blackout.
 - The caller clicks **Draw Next Number** to call the next number. Marking is
   **manual**, same as a physical card — a cell that's been called but not yet marked
   pulses amber as a nudge; click it to dab it. Nothing marks itself, on purpose.
