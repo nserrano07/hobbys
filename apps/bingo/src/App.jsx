@@ -5,7 +5,9 @@ import BingoCard from "./components/BingoCard";
 import CallerPanel from "./components/CallerPanel";
 import CallHistory from "./components/CallHistory";
 import PlayersList from "./components/PlayersList";
+import PlayerMonitor from "./components/PlayerMonitor";
 import WinnerBanner from "./components/WinnerBanner";
+import BigScreen from "./components/BigScreen";
 import { useBingoRoom, selfId } from "./lib/useBingoRoom";
 import { generateRoomCode } from "./lib/roomCode";
 import { TOTAL_NUMBERS } from "./lib/bingoCard";
@@ -66,9 +68,22 @@ export default function App() {
 
 function Game({ session, onLeave }) {
   const { roomCode, playerName, isHost, cardCount } = session;
-  const { players, calledNumbers, roundMode, cards, winners, synced, drawNumber, startNewRound, claimBingo } =
-    useBingoRoom({ roomCode, playerName, isHost, cardCount });
+  const {
+    players,
+    calledNumbers,
+    markedNumbers,
+    roundMode,
+    cards,
+    playerCards,
+    winners,
+    synced,
+    drawNumber,
+    startNewRound,
+    claimBingo,
+    toggleMark,
+  } = useBingoRoom({ roomCode, playerName, isHost, cardCount });
   const [claimMessage, setClaimMessage] = useState("");
+  const [bigScreen, setBigScreen] = useState(false);
 
   const calledSet = useMemo(() => new Set(calledNumbers), [calledNumbers]);
   const lastCalled = calledNumbers[calledNumbers.length - 1];
@@ -87,42 +102,59 @@ function Game({ session, onLeave }) {
         isHost={isHost}
         synced={synced}
         roundMode={roundMode}
+        bigScreen={bigScreen}
+        onToggleBigScreen={() => setBigScreen((b) => !b)}
         onStartNewRound={startNewRound}
         onLeave={onLeave}
       />
 
-      <main className="max-w-5xl mx-auto px-4 py-6 sm:px-6 space-y-6">
-        <WinnerBanner winners={winners} />
+      {bigScreen ? (
+        <BigScreen roundMode={roundMode} calledNumbers={calledNumbers} onExit={() => setBigScreen(false)} />
+      ) : (
+        <main className="max-w-5xl mx-auto px-4 py-6 sm:px-6 space-y-6">
+          <WinnerBanner winners={winners} />
 
-        <CallerPanel isHost={isHost} lastCalled={lastCalled} remainingCount={remainingCount} onDraw={drawNumber} />
+          <CallerPanel isHost={isHost} lastCalled={lastCalled} remainingCount={remainingCount} onDraw={drawNumber} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 flex flex-col items-center gap-4">
-            <div className="flex flex-wrap justify-center gap-4">
-              {cards.map((card, i) => (
-                <div key={i} className="flex flex-col items-center gap-1">
-                  {cards.length > 1 && <span className="text-xs font-bold text-slate-400 uppercase">Card {i + 1}</span>}
-                  <BingoCard card={card} calledSet={calledSet} />
-                </div>
-              ))}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 flex flex-col items-center gap-4">
+              <div className="flex flex-wrap justify-center gap-4">
+                {cards.map((card, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    {cards.length > 1 && (
+                      <span className="text-xs font-bold text-slate-400 uppercase">Card {i + 1}</span>
+                    )}
+                    <BingoCard card={card} calledSet={calledSet} markedNumbers={markedNumbers} onCellClick={toggleMark} />
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={handleClaim}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-10 rounded-full text-base shadow-lg transition-colors"
+                >
+                  🎉 Claim BINGO!
+                </button>
+                {claimMessage && <p className="text-xs text-slate-500">{claimMessage}</p>}
+              </div>
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <button
-                onClick={handleClaim}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-10 rounded-full text-base shadow-lg transition-colors"
-              >
-                🎉 Claim BINGO!
-              </button>
-              {claimMessage && <p className="text-xs text-slate-500">{claimMessage}</p>}
+
+            <div className="space-y-4">
+              <PlayersList players={players} selfId={selfId} />
+              <CallHistory calledNumbers={calledNumbers} />
+              {isHost && (
+                <PlayerMonitor
+                  players={players}
+                  playerCards={playerCards}
+                  calledSet={calledSet}
+                  roundMode={roundMode}
+                  selfId={selfId}
+                />
+              )}
             </div>
           </div>
-
-          <div className="space-y-4">
-            <PlayersList players={players} selfId={selfId} />
-            <CallHistory calledNumbers={calledNumbers} />
-          </div>
-        </div>
-      </main>
+        </main>
+      )}
 
       <footer className="bg-slate-900 text-slate-400 text-center py-8 mt-12 border-t border-slate-800 text-xs">
         <p>Family Bingo — a portfolio project by Natalia Serrano Ortiz.</p>
