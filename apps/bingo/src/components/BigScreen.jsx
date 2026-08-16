@@ -1,4 +1,5 @@
 import { COLUMN_LETTERS, COLUMN_RANGES, columnLetterForNumber, winModeLabel } from "../lib/bingoCard";
+import WinPatternExample from "./WinPatternExample";
 
 const HEADER_COLORS = ["bg-red-500", "bg-amber-500", "bg-emerald-500", "bg-blue-500", "bg-violet-500"];
 
@@ -20,9 +21,10 @@ export default function BigScreen({ roundMode, calledNumbers, onExit }) {
         ← Back to my card
       </button>
 
-      <div className="text-center">
+      <div className="flex flex-col items-center gap-3">
         <p className="text-slate-400 uppercase tracking-widest text-sm font-bold">Playing for</p>
         <p className="text-4xl sm:text-5xl font-black text-indigo-400">{winModeLabel(roundMode)}</p>
+        <WinPatternExample modeId={roundMode} size="md" />
       </div>
 
       <div className="text-center">
