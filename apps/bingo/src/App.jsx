@@ -38,16 +38,16 @@ export default function App() {
       <Lobby
         defaultName={defaultName}
         defaultRoomCode={defaultRoomCode}
-        onHost={(name) => {
+        onHost={(name, cardCount) => {
           savePlayerName(name);
           const roomCode = generateRoomCode();
           setRoomInUrl(roomCode);
-          setSession({ roomCode, playerName: name, isHost: true });
+          setSession({ roomCode, playerName: name, isHost: true, cardCount });
         }}
-        onJoin={(name, roomCode) => {
+        onJoin={(name, roomCode, cardCount) => {
           savePlayerName(name);
           setRoomInUrl(roomCode);
-          setSession({ roomCode, playerName: name, isHost: false });
+          setSession({ roomCode, playerName: name, isHost: false, cardCount });
         }}
       />
     );
@@ -65,12 +65,9 @@ export default function App() {
 }
 
 function Game({ session, onLeave }) {
-  const { roomCode, playerName, isHost } = session;
-  const { players, calledNumbers, card, winners, synced, drawNumber, startNewRound, claimBingo } = useBingoRoom({
-    roomCode,
-    playerName,
-    isHost,
-  });
+  const { roomCode, playerName, isHost, cardCount } = session;
+  const { players, calledNumbers, roundMode, cards, winners, synced, drawNumber, startNewRound, claimBingo } =
+    useBingoRoom({ roomCode, playerName, isHost, cardCount });
   const [claimMessage, setClaimMessage] = useState("");
 
   const calledSet = useMemo(() => new Set(calledNumbers), [calledNumbers]);
@@ -79,7 +76,7 @@ function Game({ session, onLeave }) {
 
   const handleClaim = () => {
     const result = claimBingo();
-    setClaimMessage(result ? "" : "Not quite — you don't have a complete line yet.");
+    setClaimMessage(result ? "" : "Not quite — none of your cards have a win yet.");
     if (!result) setTimeout(() => setClaimMessage(""), 3000);
   };
 
@@ -89,6 +86,7 @@ function Game({ session, onLeave }) {
         roomCode={roomCode}
         isHost={isHost}
         synced={synced}
+        roundMode={roundMode}
         onStartNewRound={startNewRound}
         onLeave={onLeave}
       />
@@ -100,7 +98,14 @@ function Game({ session, onLeave }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 flex flex-col items-center gap-4">
-            <BingoCard card={card} calledSet={calledSet} />
+            <div className="flex flex-wrap justify-center gap-4">
+              {cards.map((card, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  {cards.length > 1 && <span className="text-xs font-bold text-slate-400 uppercase">Card {i + 1}</span>}
+                  <BingoCard card={card} calledSet={calledSet} />
+                </div>
+              ))}
+            </div>
             <div className="flex flex-col items-center gap-2">
               <button
                 onClick={handleClaim}
