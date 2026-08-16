@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { joinRoom, selfId } from "trystero";
-import { generateCard, checkWin, TOTAL_NUMBERS } from "./bingoCard";
+import { generateCards, checkWinAcrossCards, TOTAL_NUMBERS, WIN_MODES } from "./bingoCard";
 
 // Unique namespace for this app on the (public, serverless) Trystero
 // signaling network — has nothing to do with any account or server of ours.
 const APP_ID = "natalia-serrano-family-bingo-v1";
+const DEFAULT_MODE = WIN_MODES[0].id;
 
 export { selfId };
 
@@ -16,14 +17,16 @@ function remainingPool(calledNumbers) {
 }
 
 // Wires up a peer-to-peer bingo room over WebRTC (via Trystero — no server,
-// no accounts). One peer is the "host": only they draw numbers, and they're
-// the source of truth a newly-joined peer syncs against. Every peer keeps
-// its own private card locally; cards are never sent over the wire.
-export function useBingoRoom({ roomCode, playerName, isHost }) {
+// no accounts). One peer is the "host": only they draw numbers and pick each
+// round's win mode; they're the source of truth a newly-joined peer syncs
+// against. Every peer keeps its own private cards locally; cards are never
+// sent over the wire.
+export function useBingoRoom({ roomCode, playerName, isHost, cardCount }) {
   const [players, setPlayers] = useState(() => ({ [selfId]: { name: playerName, isHost } }));
   const [calledNumbers, setCalledNumbers] = useState([]);
   const [roundId, setRoundId] = useState(() => Date.now());
-  const [card, setCard] = useState(() => generateCard());
+  const [roundMode, setRoundMode] = useState(DEFAULT_MODE);
+  const [cards, setCards] = useState(() => generateCards(cardCount));
   const [winners, setWinners] = useState([]);
   const [synced, setSynced] = useState(isHost);
 
@@ -32,12 +35,16 @@ export function useBingoRoom({ roomCode, playerName, isHost }) {
   calledNumbersRef.current = calledNumbers;
   const roundIdRef = useRef(roundId);
   roundIdRef.current = roundId;
+  const roundModeRef = useRef(roundMode);
+  roundModeRef.current = roundMode;
   const playerNameRef = useRef(playerName);
   playerNameRef.current = playerName;
   const isHostRef = useRef(isHost);
   isHostRef.current = isHost;
-  const cardRef = useRef(card);
-  cardRef.current = card;
+  const cardsRef = useRef(cards);
+  cardsRef.current = cards;
+  const cardCountRef = useRef(cardCount);
+  cardCountRef.current = cardCount;
 
   useEffect(() => {
     const room = joinRoom({ appId: APP_ID }, `bingo-${roomCode}`);
@@ -53,11 +60,13 @@ export function useBingoRoom({ roomCode, playerName, isHost }) {
       setPlayers((p) => ({ ...p, [peerId]: { name: payload.name, isHost: payload.isHost } }));
 
     // Only the host sends this (see onPeerJoin below) — it lets a peer who
-    // joins mid-round catch up on what's already been called.
+    // joins mid-round catch up on what's already been called and what mode
+    // this round is being played for.
     sync.onMessage = (state) => {
       setRoundId(state.roundId);
+      setRoundMode(state.roundMode);
       setCalledNumbers(state.calledNumbers);
-      setCard(generateCard());
+      setCards(generateCards(cardCountRef.current));
       setWinners([]);
       setSynced(true);
     };
@@ -69,9 +78,10 @@ export function useBingoRoom({ roomCode, playerName, isHost }) {
 
     newRound.onMessage = (payload) => {
       setRoundId(payload.roundId);
+      setRoundMode(payload.roundMode);
       setCalledNumbers([]);
       setWinners([]);
-      setCard(generateCard());
+      setCards(generateCards(cardCountRef.current));
     };
 
     claim.onMessage = (payload, { peerId }) => {
@@ -83,7 +93,11 @@ export function useBingoRoom({ roomCode, playerName, isHost }) {
       hello.send({ name: playerNameRef.current, isHost: isHostRef.current }, { target: peerId });
       if (isHostRef.current) {
         sync.send(
-          { calledNumbers: calledNumbersRef.current, roundId: roundIdRef.current },
+          {
+            calledNumbers: calledNumbersRef.current,
+            roundId: roundIdRef.current,
+            roundMode: roundModeRef.current,
+          },
           { target: peerId }
         );
       }
@@ -113,17 +127,19 @@ export function useBingoRoom({ roomCode, playerName, isHost }) {
     return number;
   }, []);
 
-  const startNewRound = useCallback(() => {
+  const startNewRound = useCallback((modeId) => {
     const newRoundId = Date.now();
+    const mode = modeId || DEFAULT_MODE;
     setRoundId(newRoundId);
+    setRoundMode(mode);
     setCalledNumbers([]);
     setWinners([]);
-    setCard(generateCard());
-    actionsRef.current.newRound?.send({ roundId: newRoundId });
+    setCards(generateCards(cardCountRef.current));
+    actionsRef.current.newRound?.send({ roundId: newRoundId, roundMode: mode });
   }, []);
 
   const claimBingo = useCallback(() => {
-    const patternType = checkWin(cardRef.current, new Set(calledNumbersRef.current));
+    const patternType = checkWinAcrossCards(cardsRef.current, new Set(calledNumbersRef.current), roundModeRef.current);
     if (!patternType) return null;
     setWinners((w) => [...w, { peerId: selfId, name: playerNameRef.current, patternType }]);
     actionsRef.current.claim?.send({
@@ -138,7 +154,8 @@ export function useBingoRoom({ roomCode, playerName, isHost }) {
     players,
     calledNumbers,
     roundId,
-    card,
+    roundMode,
+    cards,
     winners,
     synced,
     drawNumber,

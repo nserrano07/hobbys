@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { normalizeRoomCode } from "../lib/roomCode";
+import { MAX_CARDS } from "../lib/bingoCard";
 
 export default function Lobby({ defaultName, defaultRoomCode, onHost, onJoin }) {
   const [name, setName] = useState(defaultName);
   const [roomCode, setRoomCode] = useState(defaultRoomCode);
   const [mode, setMode] = useState(defaultRoomCode ? "join" : "host");
+  const [cardCount, setCardCount] = useState(1);
 
   const trimmedName = name.trim();
   const cleanRoomCode = normalizeRoomCode(roomCode);
@@ -31,6 +33,29 @@ export default function Lobby({ defaultName, defaultRoomCode, onHost, onJoin }) 
             placeholder="e.g. Mom, Uncle Pete..."
             className="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-600 uppercase mb-1">How many cards?</label>
+          <div className="flex gap-2">
+            {Array.from({ length: MAX_CARDS }, (_, i) => i + 1).map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setCardCount(n)}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-bold border transition-colors ${
+                  cardCount === n
+                    ? "bg-indigo-600 border-indigo-600 text-white"
+                    : "bg-white border-slate-300 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            More cards means more chances to win — just like buying extra cards at a real bingo hall.
+          </p>
         </div>
 
         <div className="flex gap-2 border-b border-slate-200">
@@ -60,7 +85,7 @@ export default function Lobby({ defaultName, defaultRoomCode, onHost, onJoin }) 
             </p>
             <button
               disabled={!canHost}
-              onClick={() => onHost(trimmedName)}
+              onClick={() => onHost(trimmedName, cardCount)}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold py-3 rounded-lg text-sm transition-colors"
             >
               Create Room →
@@ -78,7 +103,7 @@ export default function Lobby({ defaultName, defaultRoomCode, onHost, onJoin }) 
             />
             <button
               disabled={!canJoin}
-              onClick={() => onJoin(trimmedName, cleanRoomCode)}
+              onClick={() => onJoin(trimmedName, cleanRoomCode, cardCount)}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold py-3 rounded-lg text-sm transition-colors"
             >
               Join Room →

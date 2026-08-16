@@ -11,6 +11,7 @@ export const COLUMN_RANGES = [
 ];
 export const FREE = "FREE";
 export const TOTAL_NUMBERS = 75;
+export const MAX_CARDS = 5;
 
 function sampleUnique(min, max, count) {
   const pool = [];
@@ -30,32 +31,56 @@ export function generateCard() {
   return columns;
 }
 
+export function generateCards(count) {
+  const n = Math.max(1, Math.min(MAX_CARDS, count || 1));
+  return Array.from({ length: n }, () => generateCard());
+}
+
 export function columnLetterForNumber(num) {
   const index = COLUMN_RANGES.findIndex(([min, max]) => num >= min && num <= max);
   return index === -1 ? "" : COLUMN_LETTERS[index];
 }
 
-const WIN_LINES = (() => {
-  const lines = [];
-  for (let row = 0; row < 5; row++) lines.push([0, 1, 2, 3, 4].map((col) => [col, row]));
-  for (let col = 0; col < 5; col++) lines.push([0, 1, 2, 3, 4].map((row) => [col, row]));
-  lines.push([0, 1, 2, 3, 4].map((i) => [i, i]));
-  lines.push([0, 1, 2, 3, 4].map((i) => [i, 4 - i]));
-  return lines;
-})();
+const ROWS = [0, 1, 2, 3, 4].map((row) => [0, 1, 2, 3, 4].map((col) => [col, row]));
+const COLUMNS = [0, 1, 2, 3, 4].map((col) => [0, 1, 2, 3, 4].map((row) => [col, row]));
+const DIAGONALS = [
+  [0, 1, 2, 3, 4].map((i) => [i, i]),
+  [0, 1, 2, 3, 4].map((i) => [i, 4 - i]),
+];
 
-// Checks a card against a Set of called numbers.
-// Returns "Blackout", "Line", or null.
-export function checkWin(card, calledSet) {
+// The set of win conditions a host can pick for a round — chosen up front so
+// every player knows what shape they're watching for, same as a caller
+// announcing "playing for a line" at a real bingo hall.
+export const WIN_MODES = [
+  { id: "line", label: "Any Line", patterns: [...ROWS, ...DIAGONALS] },
+  { id: "letter", label: "Any Letter (Column)", patterns: COLUMNS },
+  { id: "blackout", label: "Full House (Blackout)", patterns: null },
+];
+
+export function winModeLabel(modeId) {
+  return WIN_MODES.find((m) => m.id === modeId)?.label || WIN_MODES[0].label;
+}
+
+// Checks a card against a Set of called numbers for a specific round mode.
+// Returns the mode's label on a win, or null.
+export function checkWin(card, calledSet, modeId) {
+  const mode = WIN_MODES.find((m) => m.id === modeId) || WIN_MODES[0];
   const isMarked = ([col, row]) => {
     const val = card[col][row];
     return val === FREE || calledSet.has(val);
   };
-  if (card.every((col) => col.every((val) => val === FREE || calledSet.has(val)))) {
-    return "Blackout";
+  if (mode.id === "blackout") {
+    return card.every((col) => col.every((val) => val === FREE || calledSet.has(val))) ? mode.label : null;
   }
-  if (WIN_LINES.some((line) => line.every(isMarked))) {
-    return "Line";
+  return mode.patterns.some((pattern) => pattern.every(isMarked)) ? mode.label : null;
+}
+
+// Checks every held card against the current mode; returns the label of the
+// first winning card found, or null if none qualify yet.
+export function checkWinAcrossCards(cards, calledSet, modeId) {
+  for (const card of cards) {
+    const result = checkWin(card, calledSet, modeId);
+    if (result) return result;
   }
   return null;
 }

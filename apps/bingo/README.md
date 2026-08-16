@@ -9,16 +9,20 @@ Live at **https://bingo.nataliaserranoortiz.com** (once deployed — see below).
 
 - **Host a game** to get a short room code (and a shareable invite link); you become the
   **caller**.
-- **Join a game** with that code and you get your own private 5x5 card (B-I-N-G-O,
-  1-75, free center space) — nobody else ever sees your card.
-- The caller clicks **Draw Next Number** to call the next number; everyone's card
-  highlights it live if they have it. There's no timer — call at whatever pace suits a
+- **Join a game** with that code. Before you go in, pick **how many cards** you want
+  (1-5) — you get your own private 5x5 cards (B-I-N-G-O, 1-75, free center space) —
+  nobody else ever sees them.
+- The caller picks a **round mode** — Any Line, Any Letter (a full column), or Full
+  House (blackout) — shown to everyone so it's clear what pattern wins. Real bingo
+  halls call this out too; shorter rounds are usually Line or Letter, a proper game is
+  Blackout.
+- The caller clicks **Draw Next Number** to call the next number; every card
+  highlights it live if it has it. There's no timer — call at whatever pace suits a
   video call.
-- Click **Claim BINGO!** once you have a complete line (row, column, or diagonal) or a
-  full blackout. It's checked against the numbers actually called before it's announced
-  to the room.
-- The caller can **Start New Round** at any point to clear the board and deal everyone a
-  fresh card.
+- Click **Claim BINGO!** once any one of your cards satisfies the current round's mode.
+  It's checked against the numbers actually called before it's announced to the room.
+- The caller can **Start New Round** at any point — pick a mode and it clears the board
+  and deals everyone fresh cards.
 
 ## No server, no accounts
 
@@ -47,33 +51,29 @@ join with the room code in the other.
 
 ## Deployment
 
-This app deploys to **Cloudflare**, not GitHub Pages — GitHub Pages only supports one
-custom domain per repository, and `apps/rentals` already uses this repo's for
-`rentals.nataliaserranoortiz.com`.
+This app deploys to **Cloudflare** (as a Worker with static assets), not GitHub Pages —
+GitHub Pages only supports one custom domain per repository, and `apps/rentals` already
+uses this repo's for `rentals.nataliaserranoortiz.com`.
 
-It uses Cloudflare's **native Git integration**, connected directly to this GitHub repo
-as a **Worker with static assets** (Cloudflare's current unified Workers + Pages
-product) rather than a GitHub Actions workflow — Cloudflare builds and deploys on its
-own whenever this repo changes, with no API tokens or repo secrets to manage. Its
-build/deploy commands (`npm run build` / `npx wrangler deploy`) read config from
-`apps/bingo/wrangler.toml`, including the build output directory (`[assets] directory`)
-— there's no separate "build output directory" field in the dashboard for this project
-type.
+Deploys run via `.github/workflows/deploy-bingo.yml`: on every push to `main` touching
+`apps/bingo/`, GitHub Actions builds the app and runs `npx wrangler deploy`, which reads
+`apps/bingo/wrangler.toml` for everything else (Worker name, static assets directory).
+This replaced an earlier attempt at Cloudflare's own Git integration, which kept
+building with a stale command no matter how the dashboard settings were edited —
+GitHub Actions makes the build fully deterministic instead.
 
-One-time setup, in the Cloudflare dashboard (Workers & Pages → your project →
-**Settings → Build**):
+One-time setup:
 
-- **Root directory**: `apps/bingo`
-- **Build command**: `npm run build` (Cloudflare fills this in automatically)
-- **Deploy command**: `npx wrangler deploy` (also automatic — reads
-  `apps/bingo/wrangler.toml` for everything else)
-
-Then, in the project's **Domains** tab, add `bingo.nataliaserranoortiz.com` and follow
-its DNS instructions.
-
-Every push triggers a fresh deploy automatically (Cloudflare rebuilds on any change to
-the repo, not just `apps/bingo/` — harmless, just an extra build once in a while when
-only `apps/rentals` changes).
+1. Create a Cloudflare API token (My Profile → API Tokens → Create Token → template
+   **"Edit Cloudflare Workers"**), and grab your Account ID from the dashboard.
+2. Add them as this repo's secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+3. The Worker itself is named `hobbys` (see `wrangler.toml`) — deploys land on the
+   existing project of that name.
+4. Custom domain: on the `hobbys` Worker, **Settings → Domains & Routes → Add → Custom
+   Domain** → `bingo.nataliaserranoortiz.com`. This binds the domain and provisions the
+   certificate automatically — no manual DNS record needed (a manually-added proxied
+   CNAME record is a separate, broken path that returns a Cloudflare 522 error, since
+   it tries to reach an "origin server" a Worker doesn't have).
 
 This app lives at `apps/bingo/` inside the `hobbys` monorepo — see the
 [top-level README](../../README.md) for the other projects alongside it.
