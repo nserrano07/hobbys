@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { WIN_MODES, winModeLabel } from "../lib/bingoCard";
 
-export default function GameHeader({ roomCode, isHost, synced, roundMode, onStartNewRound, onLeave }) {
+export default function GameHeader({
+  roomCode,
+  isHost,
+  synced,
+  roundMode,
+  bigScreen,
+  onToggleBigScreen,
+  onStartNewRound,
+  onLeave,
+}) {
   const [copied, setCopied] = useState(false);
   const [nextMode, setNextMode] = useState(roundMode);
 
@@ -38,6 +47,15 @@ export default function GameHeader({ roomCode, isHost, synced, roundMode, onStar
             className="bg-white hover:bg-slate-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg shadow text-sm transition-colors"
           >
             {copied ? "✓ Link Copied!" : "🔗 Copy Invite Link"}
+          </button>
+          <button
+            onClick={onToggleBigScreen}
+            className={`font-semibold py-2 px-3 rounded-lg text-xs transition-colors ${
+              bigScreen ? "bg-white text-indigo-700" : "bg-indigo-600 hover:bg-indigo-500 text-white"
+            }`}
+            title="A shared display of the goal and called numbers — for screen-sharing or a spare device"
+          >
+            🖥️ {bigScreen ? "Exit Big Screen" : "Big Screen"}
           </button>
           {isHost && (
             <>

@@ -10,19 +10,28 @@ Live at **https://bingo.nataliaserranoortiz.com** (once deployed — see below).
 - **Host a game** to get a short room code (and a shareable invite link); you become the
   **caller**.
 - **Join a game** with that code. Before you go in, pick **how many cards** you want
-  (1-5) — you get your own private 5x5 cards (B-I-N-G-O, 1-75, free center space) —
-  nobody else ever sees them.
+  (1-5) — you get your own 5x5 cards (B-I-N-G-O, 1-75, free center space). Other
+  players never see them; the caller does, so they can keep tabs on everyone's
+  progress (see Player Progress below).
 - The caller picks a **round mode** — Any Line, Any Letter (a full column), or Full
   House (blackout) — shown to everyone so it's clear what pattern wins. Real bingo
   halls call this out too; shorter rounds are usually Line or Letter, a proper game is
   Blackout.
-- The caller clicks **Draw Next Number** to call the next number; every card
-  highlights it live if it has it. There's no timer — call at whatever pace suits a
-  video call.
+- The caller clicks **Draw Next Number** to call the next number. Marking is
+  **manual**, same as a physical card — a cell that's been called but not yet marked
+  pulses amber as a nudge; click it to dab it. Nothing marks itself, on purpose.
 - Click **Claim BINGO!** once any one of your cards satisfies the current round's mode.
-  It's checked against the numbers actually called before it's announced to the room.
+  It's checked against the numbers you've actually clicked, not just what's been
+  called, before it's announced to the room.
 - The caller can **Start New Round** at any point — pick a mode and it clears the board
   and deals everyone fresh cards.
+- The caller also gets a **Player Progress** panel showing everyone else's cards,
+  auto-marked from the called numbers (not from their manual clicks) — a way to keep
+  an eye on how close everyone is without waiting on their claim.
+- Anyone can switch their own screen to **Big Screen** mode: a shared, projector- or
+  screen-share-friendly display of the round's goal, the latest call in huge type, and
+  a full caller board of every number called so far. Handy for a spare device or
+  screen-sharing during a video call, independent of whoever's actually playing.
 
 ## No server, no accounts
 
