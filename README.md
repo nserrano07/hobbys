@@ -29,8 +29,9 @@ supports a single custom domain per repository and Rentals Buddy already has it:
 
 - **Rentals Buddy** → **GitHub Pages**, via a path-scoped GitHub Actions workflow
   (`.github/workflows/deploy-rentals.yml`) that only runs when `apps/rentals/` changes.
-- **Family Bingo** → **Cloudflare Pages**, via Cloudflare's own Git integration (no
-  GitHub Actions workflow) — it builds directly from `apps/bingo/` on every push to
-  `main`.
+- **Family Bingo** → **Cloudflare** (a Worker with static assets), via a path-scoped
+  GitHub Actions workflow (`.github/workflows/deploy-bingo.yml`) that only runs when
+  `apps/bingo/` changes. It builds the app and runs `wrangler deploy`, which reads
+  `apps/bingo/wrangler.toml`.
 
 See each app's own README for its features and one-time deployment setup.
